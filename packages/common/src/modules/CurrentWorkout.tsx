@@ -1,8 +1,7 @@
 // CurrentWorkout.tsx - React function object
 // 0. Sample exercise set created by <WorkoutHistory.onPress() /> prior to invocation.
-// 1. Iterate through each exercise in exercises[] provided and create a <WorkoutCard /> for each.
-// 2. Specify the <WorkoutCard.onSetPress(setIndex) /> logic to be called should it's
-//    circle widget ever be clicked
+// 1. Iterate through each exercise as setup in exercises[] beforehand and create a separate <WorkoutCard /> for each.
+// 2. Implement "onSetPress()" as buttbnClick logic to be passed into each <WorkoutCard /> via "props"
 //
 // Implementation Notes
 // 1. Global RootStoreContext is imported via react.useContext (provides access to mobx state data)
