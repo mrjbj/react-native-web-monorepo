@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { action, computed, observable } from "mobx";
+import {persist} from "mobx-persist";
 
 // save the start time, then compute the elapsed time as diff from now() versus then.
 // isRunning tells us if timer is running or not.
@@ -8,9 +9,9 @@ import { action, computed, observable } from "mobx";
 //          observable attributes in mobx)
 // method "measure" computes new elapsed seconds at setInterval
 export class WorkoutTimerStore {
-    @observable startTime = dayjs();
-    @observable isRunning = false;
-    @observable seconds = 0;
+    @persist("object") @observable startTime = dayjs();
+    @persist @observable isRunning = false;
+    @persist @observable seconds = 0;
 
     @action measure = () => {
         // terminating condition for recursion.  if !isRunning, then exit

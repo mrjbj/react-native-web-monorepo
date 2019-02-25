@@ -4,18 +4,19 @@
 // <Router /> also holds reference to RouterStoreContext.screen property.
 // RouterStoreContext is injected into <Router /> via the useContext hook
 // and is used to control the page that is returned by <Router's /> render logic.
-import { observer } from "mobx-react-lite";
-import React, { useContext } from "react";
+import React from "react";
 import { CurrentWorkout } from "./modules/CurrentWorkout";
 import { WorkoutHistory } from "./modules/WorkoutHistory";
-import { RootStoreContext } from "./stores/RootStore";
+import { Route, Router, Switch } from "./Router/index"; // react (native or web) will select appropriate file
 
 // router observes the current screen page observable as defined in WorkoutStoreContext
-export const Router = observer(() => {
-    const rootStore = useContext(RootStoreContext);
-    return rootStore.routerStore.screen === "WorkoutHistory" ? (
-        <WorkoutHistory />
-    ) : (
-        <CurrentWorkout />
+export const Routes = () => {
+    return (
+        <Router>
+            <Switch>
+                <Route exact path="/" component={WorkoutHistory} />
+                <Route exact path="/current-workout" component={CurrentWorkout} />
+            </Switch>
+        </Router>
     );
-});
+};

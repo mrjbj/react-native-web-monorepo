@@ -14,11 +14,12 @@ import { observer } from "mobx-react-lite";
 import * as React from "react";
 import { Button, Text, View } from "react-native";
 import { RootStoreContext } from "../stores/RootStore";
+import { RouteComponentProps } from "react-router";
 
-interface Props {}
+interface Props extends RouteComponentProps {}
 
 // load up sample exercises when user clicks "Create Workout"
-export const WorkoutHistory: React.FC<Props> = observer(() => {
+export const WorkoutHistory: React.FC<Props> = observer(({history}) => {
     const rootStore = React.useContext(RootStoreContext);
     return (
         <View>
@@ -50,7 +51,8 @@ export const WorkoutHistory: React.FC<Props> = observer(() => {
                             weight: 360
                         }
                     );
-                    rootStore.routerStore.screen = "CurrentWorkout";
+                    // change pages by pushing
+                    history.push("/current-workout");
                 }}
             />
         </View>
