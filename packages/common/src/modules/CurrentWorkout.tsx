@@ -12,6 +12,7 @@ import * as React from "react";
 import { StyleSheet, View } from "react-native";
 import { RootStoreContext } from "../stores/RootStore";
 import { WorkoutCard } from "../ui/WorkoutCard";
+import { WorkoutTimer } from "../ui/WorkoutTimer";
 
 interface Props {}
 const styles = StyleSheet.create({
@@ -24,6 +25,19 @@ const styles = StyleSheet.create({
 
 export const CurrentWorkout: React.FC<Props> = observer(() => {
     const rootStore = React.useContext(RootStoreContext);
+    // useEffect runs "cleanup function" whenever component is unmounted.
+    // it runs after render but before the next render.
+    // in this case, we want to stop the timer should <CurrentWorkout /> go out of
+    // scope before the "x" was clicked to stop timer otherwise.
+    // [] as second parameter means the timer effect does not depend on any values
+    // in the component.  therefore no need to run it after each update.  Only run it
+    // upon mount and unmount. if no second parameter supplied, it would run on every update.
+    React.useEffect(() => {
+        console.log("useEffect triggered");
+        return () => {
+            rootStore.workoutTimerStore.stopTimer();
+        };
+    }, []);
     return (
         <View style={styles.container}>
             {rootStore.workoutStore.currentExercises.map(e => {
@@ -37,11 +51,14 @@ export const CurrentWorkout: React.FC<Props> = observer(() => {
                         onSetPress={setIndex => {
                             let newValue: string;
                             const v = e.sets[setIndex]; // string value like "5"
+                            // start timer when user clicks button;
+                            rootStore.workoutTimerStore.startTimer();
 
                             if (v === "") {
                                 newValue = `${e.reps}`;
                             } else if (v === "0") {
                                 newValue = "";
+                                rootStore.workoutTimerStore.stopTimer();
                             } else {
                                 newValue = `${parseInt(v) - 1}`;
                             }
@@ -50,6 +67,19 @@ export const CurrentWorkout: React.FC<Props> = observer(() => {
                     />
                 );
             })}
+            {// only show workout timer when isRunning
+            // need the lambda syntax around stopTimer call because function was
+            // invoked from within context of onXPress, which changed the execution
+            // environment such that "this" points to onXpress rather than
+            // WorkoutTimerStore.
+            // of the mobx observeable?
+            rootStore.workoutTimerStore.isRunning ? (
+                <WorkoutTimer
+                    percent={rootStore.workoutTimerStore.percent}
+                    currentTime={rootStore.workoutTimerStore.display}
+                    onXPress={rootStore.workoutTimerStore.stopTimer}
+                />
+            ) : null}
         </View>
     );
 });

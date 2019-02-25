@@ -5,6 +5,7 @@
 import { createContext } from "react";
 import { RouterStore } from "./RouterStore";
 import { WorkoutStore } from "./WorkoutStore";
+import {WorkoutTimerStore} from "./WorkoutTimerStore";
 
 // 1. Create RootStoreContext, the primary store container for child mobx stores.
 //    This way, only need one "react context" to access all of the child
@@ -18,6 +19,7 @@ import { WorkoutStore } from "./WorkoutStore";
 export class RootStore {
     routerStore = new RouterStore(this);
     workoutStore = new WorkoutStore(this);
+    workoutTimerStore = new WorkoutTimerStore();// don't need pointer back to root
 }
 
 export const RootStoreContext = createContext(new RootStore());
