@@ -12,6 +12,7 @@
 import { observer } from "mobx-react-lite";
 import * as React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Card } from "./Card";
 
 interface Props {
     exercise: string;
@@ -20,14 +21,7 @@ interface Props {
     onSetPress: (index: number) => void;
 }
 const styles = StyleSheet.create({
-    card: {
-        borderRadius: 3,
-        backgroundColor: "#fff",
-        shadowColor: "#000",
-        shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 3,
-        padding: 10,
+    cardContainer: {
         marginBottom: 10
     },
     topRow: {
@@ -66,62 +60,64 @@ const styles = StyleSheet.create({
 export const WorkoutCard: React.FC<Props> = observer(
     ({ exercise, repsAndWeight, sets, onSetPress }) => {
         return (
-            <View style={styles.card}>
-                <View style={styles.topRow}>
-                    <Text style={styles.topRowText}>{exercise}</Text>
-                    <Text style={styles.topRowText}>{repsAndWeight}</Text>
-                </View>
-                <View style={styles.bottomRow}>
-                    {sets.map((set, index) => {
-                        // state X
-                        if (set.toUpperCase() === "X") {
-                            return (
-                                <View
-                                    style={[styles.circle, styles.fadedBackground]}
-                                    key={set + index}
-                                >
-                                    <Text
-                                        style={[styles.circleText, styles.grayText]}
+            <View style={styles.cardContainer}>
+                <Card>
+                    <View style={styles.topRow}>
+                        <Text style={styles.topRowText}>{exercise}</Text>
+                        <Text style={styles.topRowText}>{repsAndWeight}</Text>
+                    </View>
+                    <View style={styles.bottomRow}>
+                        {sets.map((set, index) => {
+                            // state X
+                            if (set.toUpperCase() === "X") {
+                                return (
+                                    <View
+                                        style={[styles.circle, styles.fadedBackground]}
                                         key={set + index}
                                     >
-                                        X
-                                    </Text>
-                                </View>
-                            );
-                        }
-                        // state ""
-                        if (set === "") {
+                                        <Text
+                                            style={[styles.circleText, styles.grayText]}
+                                            key={set + index}
+                                        >
+                                            X
+                                        </Text>
+                                    </View>
+                                );
+                            }
+                            // state ""
+                            if (set === "") {
+                                return (
+                                    <TouchableOpacity
+                                        onPress={() => onSetPress(index)}
+                                        style={[styles.circle, styles.fadedBackground]}
+                                        key={set + index}
+                                    >
+                                        <Text style={styles.circleText} key={set + index} />
+                                    </TouchableOpacity>
+                                );
+                            }
+                            // default
+                            // clickable, so onPress() call the onSetPress() handler logic
+                            // passed in as property from above.
+                            // call it with this component's current "index" value.
+                            // e.g. onSetPress(indes).
                             return (
                                 <TouchableOpacity
                                     onPress={() => onSetPress(index)}
-                                    style={[styles.circle, styles.fadedBackground]}
+                                    style={styles.circle}
                                     key={set + index}
                                 >
-                                    <Text style={styles.circleText} key={set + index} />
+                                    <Text
+                                        style={[styles.whiteText, styles.circleText]}
+                                        key={set + index}
+                                    >
+                                        {set}
+                                    </Text>
                                 </TouchableOpacity>
                             );
-                        }
-                        // default
-                        // clickable, so onPress() call the onSetPress() handler logic
-                        // passed in as property from above.
-                        // call it with this component's current "index" value.
-                        // e.g. onSetPress(indes).
-                        return (
-                            <TouchableOpacity
-                                onPress={() => onSetPress(index)}
-                                style={styles.circle}
-                                key={set + index}
-                            >
-                                <Text
-                                    style={[styles.whiteText, styles.circleText]}
-                                    key={set + index}
-                                >
-                                    {set}
-                                </Text>
-                            </TouchableOpacity>
-                        );
-                    })}
-                </View>
+                        })}
+                    </View>
+                </Card>
             </View>
         );
     }

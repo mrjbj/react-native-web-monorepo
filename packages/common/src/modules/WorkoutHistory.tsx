@@ -12,15 +12,42 @@
 // observes RouterStore.screen via RouterStoreContext
 import { observer } from "mobx-react-lite";
 import * as React from "react";
-import { Button, Text, View } from "react-native";
-import { RootStoreContext } from "../stores/RootStore";
+import { Button, StyleSheet, Text, View } from "react-native";
 import { RouteComponentProps } from "react-router";
+import { RootStoreContext } from "../stores/RootStore";
+import { HistoryCard } from "../ui/HistoryCard";
 
 interface Props extends RouteComponentProps {}
 
+const styles = StyleSheet.create({
+    row: {
+        flexDirection: "row"
+    }
+});
+
 // load up sample exercises when user clicks "Create Workout"
-export const WorkoutHistory: React.FC<Props> = observer(({history}) => {
+export const WorkoutHistory: React.FC<Props> = observer(({ history }) => {
     const rootStore = React.useContext(RootStoreContext);
+
+    const rows: JSX.Element[][] = [];
+
+    Object.entries(rootStore.workoutStore.history).forEach(([dt, v], idx) => {
+        // Obj.entries turns obj into array.
+        // array is keyed array of Current exercise
+        // so as we iterate across each one, we have a key [date],
+        // plus the value tied to that date (which is an array of current exercise)
+        // destructuring the array via [] syntax in the map parameters gives us
+        // date and v.
+        const hc = <HistoryCard key={dt} header={dt} currentExercises={v} />;
+        // even entries go on column 0
+        if (idx % 2 === 0) {
+            rows.push([hc]);
+        } else {
+            // odd entries go in column 1
+            rows[rows.length - 1].push(hc);
+        }
+    });
+    console.log("JSX Rows = ", rows);
     return (
         <View>
             <Text>Workout History Page</Text>
@@ -40,7 +67,7 @@ export const WorkoutHistory: React.FC<Props> = observer(({history}) => {
                             exercise: "Bench Press",
                             numSets: 5,
                             reps: 5,
-                            sets: ["", "", "", "", ""],
+                            sets: ["5", "5", "5", "5", "5"],
                             weight: 200
                         },
                         {
@@ -55,6 +82,12 @@ export const WorkoutHistory: React.FC<Props> = observer(({history}) => {
                     history.push("/current-workout");
                 }}
             />
+            {
+                rows.map((r, idx) => (
+                <View style={styles.row} key={idx}>
+                    {r}
+                </View>
+                ))}
         </View>
     );
 });
