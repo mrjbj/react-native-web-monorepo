@@ -11,7 +11,7 @@
 import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
 import * as React from "react";
-import { Button, StyleSheet, View } from "react-native";
+import { Button, ScrollView, StyleSheet, View } from "react-native";
 import { RouteComponentProps } from "react-router";
 import { RootStoreContext } from "../stores/RootStore";
 import { WorkoutCard } from "../ui/WorkoutCard";
@@ -21,8 +21,11 @@ interface Props extends RouteComponentProps {} // adds in "history" property
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fafafa",
-        padding: 10
+        backgroundColor: "#fafafa"
+    },
+    scrollContainer: {
+        padding: 10,
+        marginBottom: 50,
     }
 });
 
@@ -43,46 +46,48 @@ export const CurrentWorkout: React.FC<Props> = observer(({ history }) => {
     }, []);
     return (
         <View style={styles.container}>
-            {rootStore.workoutStore.currentExercises.map(e => {
-                return (
-                    // CONFIRM: setIndex is passed in by React as int offest automatically?
-                    <WorkoutCard
-                        exercise={e.exercise}
-                        key={e.exercise}
-                        repsAndWeight={`${e.numSets}x${e.reps} ${e.weight}`}
-                        sets={e.sets}
-                        onSetPress={setIndex => {
-                            let newValue: string;
-                            const v = e.sets[setIndex]; // string value like "5"
-                            // start timer when user clicks button;
-                            rootStore.workoutTimerStore.startTimer();
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                {rootStore.workoutStore.currentExercises.map(e => {
+                    return (
+                        // CONFIRM: setIndex is passed in by React as int offest automatically?
+                        <WorkoutCard
+                            exercise={e.exercise}
+                            key={e.exercise}
+                            repsAndWeight={`${e.numSets}x${e.reps} ${e.weight}`}
+                            sets={e.sets}
+                            onSetPress={setIndex => {
+                                let newValue: string;
+                                const v = e.sets[setIndex]; // string value like "5"
+                                // start timer when user clicks button;
+                                rootStore.workoutTimerStore.startTimer();
 
-                            if (v === "") {
-                                newValue = `${e.reps}`;
-                            } else if (v === "0") {
-                                newValue = "";
-                                rootStore.workoutTimerStore.stopTimer();
-                            } else {
-                                newValue = `${parseInt(v) - 1}`;
-                            }
-                            e.sets[setIndex] = newValue;
-                        }}
-                    />
-                );
-            })}
-            <Button
-                title="SAVE"
-                onPress={() => {
-                    // save current exercises to workout history using date as index key (& then clear)
-                    rootStore.workoutStore.history[
-                        dayjs(
-                            new Date(+new Date() - Math.floor(Math.random() * 10000000000))
-                        ).format("YYYY-MM-DD")
-                    ] = rootStore.workoutStore.currentExercises;
-                    rootStore.workoutStore.currentExercises = [];
-                    history.push("/");
-                }}
-            />
+                                if (v === "") {
+                                    newValue = `${e.reps}`;
+                                } else if (v === "0") {
+                                    newValue = "";
+                                    rootStore.workoutTimerStore.stopTimer();
+                                } else {
+                                    newValue = `${parseInt(v) - 1}`;
+                                }
+                                e.sets[setIndex] = newValue;
+                            }}
+                        />
+                    );
+                })}
+                <Button
+                    title="SAVE"
+                    onPress={() => {
+                        // save current exercises to workout history using date as index key (& then clear)
+                        rootStore.workoutStore.history[
+                            dayjs(
+                                new Date(+new Date() - Math.floor(Math.random() * 10000000000))
+                            ).format("YYYY-MM-DD")
+                        ] = rootStore.workoutStore.currentExercises;
+                        rootStore.workoutStore.currentExercises = [];
+                        history.push("/");
+                    }}
+                />
+            </ScrollView>
             {// only show workout timer when isRunning
             // need the lambda syntax around stopTimer call because function was
             // invoked from within context of onXPress, which changed the execution

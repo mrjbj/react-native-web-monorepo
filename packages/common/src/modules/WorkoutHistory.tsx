@@ -22,6 +22,10 @@ interface Props extends RouteComponentProps {}
 const styles = StyleSheet.create({
     row: {
         flexDirection: "row"
+    },
+    cardContainer: {
+        flex: 1,
+        padding: 10
     }
 });
 
@@ -38,9 +42,13 @@ export const WorkoutHistory: React.FC<Props> = observer(({ history }) => {
         // plus the value tied to that date (which is an array of current exercise)
         // destructuring the array via [] syntax in the map parameters gives us
         // date and v.
-        const hc = <HistoryCard key={dt} header={dt} currentExercises={v} />;
+        const hc = (
+            <View key={dt} style={styles.cardContainer}>
+                <HistoryCard header={dt} currentExercises={v} />
+            </View>
+        );
         // even entries go on column 0
-        if (idx % 2 === 0) {
+        if (idx % 3 === 0) {
             rows.push([hc]);
         } else {
             // odd entries go in column 1
@@ -82,12 +90,19 @@ export const WorkoutHistory: React.FC<Props> = observer(({ history }) => {
                     history.push("/current-workout");
                 }}
             />
-            {
-                rows.map((r, idx) => (
+            {rows.map((r, idx) => (
                 <View style={styles.row} key={idx}>
                     {r}
+                    {r.length === 2 ? <View style={styles.cardContainer} /> : null}
+                    {r.length === 1 ? (
+                        <>
+                            {" "}
+                            <View style={styles.cardContainer} />{" "}
+                            <View style={styles.cardContainer} />{" "}
+                        </>
+                    ) : null}
                 </View>
-                ))}
+            ))}
         </View>
     );
 });
