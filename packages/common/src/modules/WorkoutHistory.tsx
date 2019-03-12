@@ -12,9 +12,10 @@
 // observes RouterStore.screen via RouterStoreContext
 import { observer } from "mobx-react-lite";
 import * as React from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, FlatList, StyleSheet, Text, View } from "react-native";
 import { RouteComponentProps } from "react-router";
 import { RootStoreContext } from "../stores/RootStore";
+import { CurrentExercise } from "../stores/WorkoutStore";
 import { HistoryCard } from "../ui/HistoryCard";
 
 interface Props extends RouteComponentProps {}
@@ -33,26 +34,31 @@ const styles = StyleSheet.create({
 export const WorkoutHistory: React.FC<Props> = observer(({ history }) => {
     const rootStore = React.useContext(RootStoreContext);
 
-    const rows: JSX.Element[][] = [];
+    const rows: Array<
+        Array<{
+            date: string;
+            exercises: CurrentExercise[];
+        }>
+    > = [];
 
-    Object.entries(rootStore.workoutStore.history).forEach(([dt, v], idx) => {
+    Object.entries(rootStore.workoutStore.history).forEach(([date, exercises], idx) => {
         // Obj.entries turns obj into array.
         // array is keyed array of Current exercise
         // so as we iterate across each one, we have a key [date],
         // plus the value tied to that date (which is an array of current exercise)
         // destructuring the array via [] syntax in the map parameters gives us
         // date and v.
-        const hc = (
-            <View key={dt} style={styles.cardContainer}>
-                <HistoryCard header={dt} currentExercises={v} />
-            </View>
-        );
-        // even entries go on column 0
+        // const hc = (
+        //     <View key={dt} style={styles.cardContainer}>
+        //         <HistoryCard header={dt} currentExercises={v} />
+        //     </View>
+        // );
+        // // even entries go on column 0
         if (idx % 3 === 0) {
-            rows.push([hc]);
+            rows.push([{ date, exercises }]);
         } else {
             // odd entries go in column 1
-            rows[rows.length - 1].push(hc);
+            rows[rows.length - 1].push({ date, exercises });
         }
     });
     console.log("JSX Rows = ", rows);
@@ -90,19 +96,21 @@ export const WorkoutHistory: React.FC<Props> = observer(({ history }) => {
                     history.push("/current-workout");
                 }}
             />
-            {rows.map((r, idx) => (
-                <View style={styles.row} key={idx}>
-                    {r}
-                    {r.length === 2 ? <View style={styles.cardContainer} /> : null}
-                    {r.length === 1 ? (
-                        <>
-                            {" "}
-                            <View style={styles.cardContainer} />{" "}
-                            <View style={styles.cardContainer} />{" "}
-                        </>
-                    ) : null}
-                </View>
-            ))}
+            <FlatList
+                renderItem={({ item }) => (
+                    <View style={styles.row}>
+                        {item.map(({ date, exercises }) => (
+                            <View key={date} style={styles.cardContainer}>
+                                <HistoryCard header={date} currentExercises={exercises} />
+                            </View>
+                        ))}
+                        {item.length < 3 ? <View style={styles.cardContainer} /> : null}
+                        {item.length < 2 ? <View style={styles.cardContainer} /> : null}
+                    </View>
+                )}
+                data={rows}
+                keyExtractor={item => item.reduce((pv, cv) => pv + " " + cv.date, "")}
+            />
         </View>
     );
 });
